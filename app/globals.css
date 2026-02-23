@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* VERDICT Custom Palette */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #141414;
+    --bg-card: #1a1a1a;
+    --bg-elevated: #1f1f1f;
+    --border-default: #2a2a2a;
+    --border-accent: #333333;
+
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #6a6a6a;
+    --text-terminal: #00ff00;
+
+    --accent-primary: #3b82f6;
+    /* Blue for Investment Banking */
+    --accent-secondary: #10b981;
+    /* Emerald for Consulting */
+    --accent-neutral: #6366f1;
+    /* Indigo for neutral actions */
+
+    --status-active: #10b981;
+    --status-processing: #3b82f6;
+    --status-pending: #6366f1;
+    --status-complete: #00ff00;
+
+    /* Shadcn System Variables (Mapped to Custom Palette where possible) */
+    --background: 0 0% 4%;
+    /* #0a0a0a */
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 10%;
+    /* #1a1a1a */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 217 91% 60%;
+    /* #3b82f6 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 9%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 9%;
+    --muted-foreground: 0 0% 63.9%;
+
+    --accent: 0 0% 9%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 16.5%;
+    /* #2a2a2a */
+    --input: 0 0% 16.5%;
+    --ring: 217 91% 60%;
+
+    --radius: 0rem;
+    /* Sharp edges */
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    @apply bg-[#0a0a0a] text-white;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom utilities */
+.glass-panel {
+  @apply bg-[#141414]/80 backdrop-blur-md border border-[#2a2a2a];
+}
+
+.terminal-text {
+  @apply font-mono text-[#00ff00];
+}
