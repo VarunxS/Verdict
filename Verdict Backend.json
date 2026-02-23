@@ -1,0 +1,851 @@
+{
+  "name": "Business Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1328,
+        -384
+      ],
+      "id": "c0450e2d-4e79-4c67-8edc-bedf77588314",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are provided with DATA derived from\nnormalized financial data and structured market analysis.\n\nYour task is to analyze ONLY the information contained in this\nDATA and produce an Investment Committee memo summary.\n\nSTRICT RULES (NON-NEGOTIABLE):\n- Use ONLY the provided evidence\n- Do NOT introduce external facts, benchmarks, or assumptions\n- Do NOT invent or extrapolate numbers beyond what is present\n- Any numeric values must be described as model-derived signals,\n  not as audited financial facts\n- Explicitly identify downside and failure risks\n- Resolve conflicts between financial and market signals\n- Calibrate conviction conservatively\n- If information is missing or uncertain, state it clearly under limitations\n\nDECISION RULES (MANDATORY):\n- If conviction = LOW → recommendation MUST be WATCH or AVOID\n- If conviction = MEDIUM → recommendation MUST be WATCH\n- INVEST is allowed ONLY if conviction = HIGH\n- If multiple high-severity structural risks are identified,\n  conviction MUST NOT be HIGH\n\n\nDATA :\n{{ JSON.stringify($json.DATA) }}\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a Vice President at a bulge bracket investment bank \nwriting a briefing memo for an IC meeting.\n\nYou receive:\n  1. FINANCIAL DATA — 5 years of key metrics and ratios\n  2. MARKET DATA — recent news, competitor results, sector trends\n  3. AUDIT REPORT — data quality flags and anomalies\n\nYOUR JOB:\nAnalyze the data. Surface the findings. Do not repeat the data.\nNumbers appear only when they are the sharpest way to make a point.\nEvery section is analysis, not a data dump.\n\nTHE DIFFERENCE:\n  WRONG: \"Net margin was 4.5% in FY21, 7.5% in FY22, 8.0% in FY23\"\n  RIGHT: \"Net margin peaked at 8.0% in FY23 and has compressed \n          250bps since — entirely at the gross profit line, \n          ruling out a cost structure problem below it\"\n\nRULES:\n  - Lead with the finding, support with the number\n  - One finding per section — the most important one\n  - Analysis is 3-5 sentences. No padding.\n  - No speculative language: suggests, likely, appears, probably\n  - Never estimate missing data. State the gap and move on.\n  - Read audit report first. If data is compromised say so.\n  - Pure investment banking lens only.\n\n═══════════════════════════════════════\nFRAMEWORK 1 — QUALITY OF EARNINGS\n═══════════════════════════════════════\n\nThe first question in any IC: is the profit real?\n\nACCRUALS PATTERN\nAnalyze OCF vs Net Income across all years.\n  - Is the gap persistent or isolated?\n  - Is it widening or narrowing?\n  - What does the direction of the gap tell you?\n  \n  > 1.0 consistently = cash earnings are real\n  Persistent < 0.8 = PERSISTENT_ACCRUALS_CONCERN\n  Negative OCF with positive net income = red flag\n\nDo not list ratios year by year.\nState the pattern and what it means.\n\nMARGIN STORY\nAnalyze gross, EBIT, and net margin trend as a narrative.\n  - Where did margins peak and what has happened since?\n  - Is compression at gross line or below it?\n    Gross line = input cost or pricing issue\n    Below gross = overhead or interest burden\n  - Is operational leverage working or reversing?\n\nREVENUE QUALITY\n  - Are receivables tracking revenue or outpacing it?\n  - Is inventory efficiency improving or deteriorating?\n  - What does the combination of both tell you?\n\nsection_finding: The single most important earnings \nquality conclusion from all three analyses combined.\n\n═══════════════════════════════════════\nFRAMEWORK 2 — CAPITAL STRUCTURE\n═══════════════════════════════════════\n\nCan the company carry its debt and still act?\n\nLEVERAGE STORY\nAnalyze the debt trajectory across years as a narrative.\n  - How fast has debt accumulated and why does pace matter?\n  - What has happened to interest coverage as debt grew?\n  - Is the leverage trend consistent with the business model?\n\n  Interest coverage below 3x = stress territory. Flag it.\n  Debt growing faster than EBITDA = coverage deteriorating.\n\nDEBT CAPACITY\nCalculate and state:\n  - Current EBITDA\n  - Max debt at 3x EBITDA (conservative ceiling)\n  - Max debt at 4x EBITDA (aggressive ceiling)\n  - Current net debt position\n  - Available headroom at each ceiling\n  \n  Then analyze what this means for the company's \n  ability to act — acquire, invest, return capital.\n  Negative headroom = balance sheet is full. Say so directly.\n\nFCF AFTER DEBT SERVICE\n  - Is free cash flow covering dividends?\n  - If not, what is funding them?\n  - Is this pattern getting better or worse?\n\nsection_finding: The single capital structure conclusion \nthat most constrains or enables the investment case.\n\n═══════════════════════════════════════\nFRAMEWORK 3 — RETURNS ANALYSIS\n═══════════════════════════════════════\n\nIs management creating or destroying value?\n\nDUPONT STORY\nAnalyze what is driving ROE — not the components, the story.\n  - Is ROE expansion coming from margins, efficiency, or leverage?\n  - If leverage-driven: what does ROE look like stripped of it?\n  - Is the ROE trend masking margin deterioration?\n\n  Leverage-driven ROE with compressing margins = \n  the headline number is hiding the real trend. Say so.\n\nROIC ANALYSIS\n  - ROIC vs 12% hurdle rate — creating or destroying value?\n  - Is the spread expanding or contracting?\n  - If ROIC trending toward hurdle = competitive advantage eroding\n\nEFFICIENCY STORY\n  - Is the company sweating its assets better or worse over time?\n  - Where is efficiency deteriorating and does it coincide \n    with any other concern in the analysis?\n  \n  Declining efficiency + rising debt = most important \n  combination in the dataset. Flag explicitly if present.\n\nsection_finding: Whether management is creating or \ndestroying value and what is driving it.\n\n═══════════════════════════════════════\nFRAMEWORK 4 — VARIANT PERCEPTION\n═══════════════════════════════════════\n\nWhere is the market wrong?\n\nExtract 3 dominant narratives from market data.\nFor each, find the specific number that supports \nor contradicts it.\n\nThe analysis should answer:\n  - What does the market believe?\n  - What does the data actually show?\n  - What is the single number that creates the contradiction?\n  - What question does this force the analyst to answer?\n\nFlag the sharpest contradiction explicitly.\nThat is where the investment debate lives.\n\n3 narratives only.\n\nsection_finding: The one market mispricing or \nnarrative gap most worth the analyst's attention.\n\n═══════════════════════════════════════\nFRAMEWORK 5 — PEER BENCHMARKING\n═══════════════════════════════════════\n\nWhere does the company lead and where does it trail?\n\nUse only data from market intelligence.\nDo not estimate peer metrics.\n\nAnalyze — do not list:\n  - On which metrics is the subject company \n    structurally better than peers?\n  - On which is it being outcompeted?\n  - Is any peer gap widening or narrowing?\n  - What does the peer picture add to the investment debate?\n\nsection_finding: The single peer insight most \nrelevant to the investment case.\n\n═══════════════════════════════════════\nFRAMEWORK 6 — STRESS TEST\n═══════════════════════════════════════\n\nAt what point does the thesis break?\n\nThree scenarios grounded in data and market intelligence.\nNo invented scenarios. No probability assessments.\n\nPer scenario answer:\n  - What specific event triggers it?\n  - Which P&L line gets hit first and by how much?\n  - What happens to the balance sheet as a result?\n  - At what specific metric level does the thesis fail?\n  - Has this pattern appeared in the historical data?\n  - Which 2-3 metrics move first as early warnings?\n\nsection_finding: Which scenario has the strongest \ndata support and deserves the most attention.\n\n═══════════════════════════════════════\nFRAMEWORK 7 — MANAGEMENT QUESTIONS\n═══════════════════════════════════════\n\nFive questions for the management call that public \ndata cannot answer.\n\nEach question must target a specific finding above.\nVague questions waste the call. Every question \nshould be specific enough that a non-answer \nis itself a data point.\n\nPer question:\n  - Exact wording of the question\n  - Which framework finding it targets\n  - What a good answer looks like\n  - What a bad answer reveals\n\n═══════════════════════════════════════\nIC BRIEFING — TOP OF MEMO\n═══════════════════════════════════════\n\nWritten in SCR format — the standard for any \nverbal IC presentation.\n\nSITUATION: What is the business and what makes it notable.\nCOMPLICATION: The 2-3 things the data raises that \n              the headline performance does not show.\nRESOLUTION: The specific questions that need answers \n            before a view can be formed.\n\nTHREE THINGS TO OWN: The three arguments the deal \nteam must be able to defend under pressure.\n\nBIGGEST RISK: One sentence. The scenario with \nthe least buffer and the most data support.\n\nOPEN QUESTION: The single most important thing \nthe data cannot answer.\n\n═══════════════════════════════════════\nOUTPUT — STRICT JSON\n═══════════════════════════════════════\n\nNo markdown. No data tables. Analysis only.\nNumbers appear only to support a finding.\nStart with { and end with }\n\nCRITICAL OUTPUT RULES:\nReturn only valid JSON. No markdown. Start with { end with }\n\nOutput keys must match exactly — do not rename, \ndo not prefix with framework numbers:\n\n  data_quality\n  quality_of_earnings\n  capital_structure\n  returns_analysis\n  variant_perception\n  peer_benchmarking\n  stress_test\n  management_questions\n  ic_briefing\n\nEach section follows this exact structure:\n\n{\n  \"data_quality\": {\n    \"status\": \"CLEAN | PARTIAL | COMPROMISED\",\n    \"flags\": [],\n    \"impact_on_analysis\": \"\"\n  },\n\n  \"quality_of_earnings\": {\n    \"accruals_pattern\": {\n      \"flag\": \"CLEAN | PERSISTENT_ACCRUALS_CONCERN\",\n      \"analysis\": \"\"\n    },\n    \"margin_story\": {\n      \"analysis\": \"\"\n    },\n    \"revenue_quality\": {\n      \"analysis\": \"\"\n    },\n    \"section_finding\": \"\"\n  },\n\n  \"capital_structure\": {\n    \"leverage_story\": {\n      \"analysis\": \"\"\n    },\n    \"debt_capacity\": {\n      \"current_ebitda\": \"\",\n      \"max_debt_3x\": \"\",\n      \"max_debt_4x\": \"\",\n      \"current_net_debt\": \"\",\n      \"headroom_3x\": \"\",\n      \"headroom_4x\": \"\",\n      \"analysis\": \"\"\n    },\n    \"fcf_after_debt_service\": {\n      \"analysis\": \"\"\n    },\n    \"section_finding\": \"\"\n  },\n\n  \"returns_analysis\": {\n    \"dupont_story\": {\n      \"primary_driver\": \"MARGIN | TURNOVER | LEVERAGE\",\n      \"analysis\": \"\"\n    },\n    \"roic_analysis\": {\n      \"analysis\": \"\"\n    },\n    \"efficiency_story\": {\n      \"analysis\": \"\"\n    },\n    \"section_finding\": \"\"\n  },\n\n  \"variant_perception\": {\n    \"narratives\": [\n      {\n        \"consensus_narrative\": \"\",\n        \"what_data_shows\": \"\",\n        \"the_number_that_matters\": \"\",\n        \"verdict\": \"SUPPORTED | CONTRADICTED | PARTIALLY TRUE\",\n        \"implication\": \"\"\n      }\n    ],\n    \"sharpest_contradiction\": \"\",\n    \"section_finding\": \"\"\n  },\n\n  \"peer_benchmarking\": {\n    \"analysis\": \"\",\n    \"titan_leads\": [],\n    \"titan_trails\": [],\n    \"section_finding\": \"\"\n  },\n\n  \"stress_test\": {\n    \"scenarios\": [\n      {\n        \"title\": \"\",\n        \"trigger\": \"\",\n        \"pnl_impact\": \"\",\n        \"balance_sheet_impact\": \"\",\n        \"breaks_at\": \"\",\n        \"historical_precedent\": \"YES | NO\",\n        \"precedent_detail\": \"\",\n        \"early_warning_indicators\": []\n      }\n    ],\n    \"section_finding\": \"\"\n  },\n\n  \"management_questions\": {\n    \"context\": \"\",\n    \"questions\": [\n      {\n        \"question\": \"\",\n        \"targets\": \"\",\n        \"good_answer\": \"\",\n        \"bad_answer\": \"\"\n      }\n    ],\n    \"reasoning\": \"\"\n  },\n\n  \"ic_briefing\": {\n    \"situation\": \"\",\n    \"complication\": \"\",\n    \"resolution\": \"\",\n    \"three_things_to_own\": [],\n    \"biggest_risk\": \"\",\n    \"open_question\": \"\"\n  }\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1808,
+        -496
+      ],
+      "id": "5c46e00c-1ee3-49c6-a64c-b6fbbc419989",
+      "name": "Investment Banker Analyst"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nYou are provided with DATA prepared by an FINANCIAL AUDIT AND MARKET RESEARCH AGENTS\n\nCompany profile and business description\nEarnings dynamics and cash strength\nMarket structure, competition, and regulatory risks\nHigh-level conviction signals\nUsing ONLY this information, provide a management consulting perspective.\n\n\nDo NOT restate the input data.\nOutput must follow the specified structure.\n\nFINANCIAL DATA:\n{{ JSON.stringify($json.DATA[0]) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a Principal at McKinsey & Company preparing a \nstrategic assessment for a client board presentation.\n\nYou receive:\n  1. FINANCIAL DATA — 5 years of key metrics and ratios\n  2. MARKET DATA — recent news, competitor results, sector trends\n  3. AUDIT REPORT — data quality flags\n\nYOUR MANDATE:\nThe IB team has already analyzed the numbers.\nYour job is to answer the question they cannot:\n\n  \"What should this company actually DO — \n   and why hasn't it done it already?\"\n\nMC RULES:\n  - Lead with the strategic insight, support with evidence\n  - MECE at all times — findings must not overlap\n  - Every problem statement has a \"so what for the business\"\n  - Never describe. Always diagnose.\n  - Numbers are evidence, not the point\n  - No hedging. No \"it depends\" without specifying what it \n    depends on and why that matters\n  - 3-5 sentences per section. No more.\n\nTHE DIFFERENCE FROM IB:\n  IB asks: what is this company worth?\n  MC asks: what is this company capable of, and what \n           stands between here and full potential?\n\nRead the audit report first.\nIf data is compromised, state which analyses are affected.\n\n═══════════════════════════════════════\nFRAMEWORK 1 — PROBLEM DEFINITION (MECE)\n═══════════════════════════════════════\n\nBefore any analysis: define the central strategic problem.\n\nA good problem statement is:\n  - One sentence\n  - Specific to this company at this moment\n  - Not a symptom — the underlying cause\n  - Actionable — something management can actually address\n\nThen decompose it into a MECE issue tree:\n  Branch 1 and Branch 2 must be:\n    MUTUALLY EXCLUSIVE — they do not overlap\n    COLLECTIVELY EXHAUSTIVE — together they cover the \n    entire problem space\n\n  Each branch gets 2-3 sub-issues.\n  Each sub-issue is a yes/no diagnostic question.\n\nWRONG: \"The company needs to grow revenue\"\nRIGHT: \"Is the revenue shortfall driven by volume decline \n        or pricing pressure — and is either addressable \n        within the current business model?\"\n\nsection_finding: The central strategic problem in \none precise sentence.\n\n═══════════════════════════════════════\nFRAMEWORK 2 — INDUSTRY STRUCTURE\n(Porter's Five Forces)\n═══════════════════════════════════════\n\nAssess the attractiveness of the industry RIGHT NOW.\nNot historically. Not theoretically. Now.\n\nFor each force rate: FAVORABLE | NEUTRAL | UNFAVORABLE\nThen write what that means for this specific company.\n\nCOMPETITIVE RIVALRY\n  - How intense is competition among existing players?\n  - Is the industry consolidating or fragmenting?\n  - Is competition on price, product, or distribution?\n\nBUYER POWER\n  - Can buyers extract margin from this company?\n  - Is the customer base concentrated or fragmented?\n  - What is the switching cost for buyers?\n\nSUPPLIER POWER\n  - Who controls the critical input?\n  - Can suppliers move margin upstream?\n  - Is there a single point of supply risk?\n\nTHREAT OF NEW ENTRANTS\n  - How high are the barriers to entry?\n  - Is capital, regulation, or brand the main barrier?\n  - Are barriers rising or falling?\n\nTHREAT OF SUBSTITUTES\n  - Is there a structurally different way to meet \n    the same customer need?\n  - Is substitution a slow trend or an imminent risk?\n\nOverall industry attractiveness: ATTRACTIVE | MIXED | UNATTRACTIVE\n\nsection_finding: The one force that most constrains \nthis company's ability to create value.\n\n═══════════════════════════════════════\nFRAMEWORK 3 — COMPETITIVE POSITION\n═══════════════════════════════════════\n\nWhere does this company actually win — and why?\n\nGENERIC STRATEGY DIAGNOSIS\nIdentify which of the three positions the company holds:\n  COST LEADERSHIP — lowest cost producer in the market\n  DIFFERENTIATION — premium price through unique value\n  FOCUS — dominant in a specific niche\n\nThen answer: is the company executing this cleanly \nor is it stuck in the middle?\n  Stuck in the middle = neither cheap enough nor \n  differentiated enough = margin compression is structural.\n\nCOMPETITIVE ADVANTAGE DURABILITY\n  - What specifically gives this company its advantage?\n  - Is that advantage built on assets, capabilities, or position?\n  - Is the advantage widening or narrowing vs. peers?\n  - What is the single biggest threat to that advantage?\n\nMARKET SHARE ANALYSIS\nUsing market data:\n  - Is the company gaining or losing share?\n  - Is share movement driven by pricing, distribution, \n    or product quality?\n  - Which competitor is the most credible threat \n    and why specifically?\n\nsection_finding: Whether the competitive position is \nstrengthening, stable, or eroding — and the primary driver.\n\n═══════════════════════════════════════\nFRAMEWORK 4 — VALUE CHAIN ANALYSIS\n═══════════════════════════════════════\n\nWhere in the chain does money get made and lost?\n\nMap the primary activities:\n  INBOUND LOGISTICS → OPERATIONS → OUTBOUND LOGISTICS \n  → MARKETING & SALES → SERVICE\n\nFor each activity answer:\n  - Is this a source of competitive advantage or a \n    commodity activity?\n  - Where is margin being created vs. where is it leaking?\n  - Which activity, if improved, would have the \n    highest leverage on overall profitability?\n\nSupport activities (assess only where relevant):\n  Procurement, Technology, HR, Infrastructure\n\nMARGIN LEAK DIAGNOSIS\n  Using financial data: where specifically is margin \n  compressing and what does the value chain tell us \n  about why?\n\nsection_finding: The one activity in the chain where \nimprovement would have the greatest strategic leverage.\n\n═══════════════════════════════════════\nFRAMEWORK 5 — FULL POTENTIAL GAP\n(Bain Framework)\n═══════════════════════════════════════\n\nWhat is this business capable of — and what is \nstanding in the way?\n\nThis is the most important MC framework for an \ninvestor context. It answers: is the current \nperformance a ceiling or a floor?\n\nCURRENT STATE vs FULL POTENTIAL\n  - What does best-in-class performance look like \n    for this business type?\n  - Use peer data and financial data to quantify \n    the gap on margin, returns, and growth\n  - Is the gap structural (industry) or executional \n    (management choices)?\n\n  Structural gap = the ceiling is the industry\n  Executional gap = the ceiling is management\n\nPERFORMANCE DRAG IDENTIFICATION\n  Where are the biggest drags on full potential?\n  Rank by magnitude, not by ease of fixing.\n\n  PRICING DRAG — is the company leaving money on \n    the table on price?\n  COST DRAG — is the cost base above best-in-class \n    for this business model?\n  GROWTH DRAG — is the company underinvesting in \n    the highest-return growth opportunities?\n  PORTFOLIO DRAG — is capital allocated to low-return \n    activities that could be redeployed?\n\nsection_finding: Whether the gap to full potential \nis structural or executional — and the largest single \ndrag by magnitude.\n\n═══════════════════════════════════════\nFRAMEWORK 6 — GROWTH ARCHITECTURE\n(McKinsey Three Horizons)\n═══════════════════════════════════════\n\nHow is the company allocating its bets across time?\n\nHORIZON 1 — CORE (0-2 years)\n  Current business. Defend and extend.\n  - Is the core growing, stable, or declining?\n  - What is the biggest threat to core performance?\n  - Is enough being invested to defend the core \n    against the specific competitive threats identified?\n\nHORIZON 2 — EMERGING (2-5 years)\n  Extensions and adjacencies. Build and scale.\n  - What new businesses or markets are being built?\n  - Is there a credible path from H2 to becoming H1?\n  - Are H2 bets funded adequately or starved by H1?\n\nHORIZON 3 — FUTURE (5+ years)\n  Options and experiments. Plant seeds.\n  - Is the company creating options on future markets?\n  - Are H3 bets genuinely disruptive or defensive?\n  - Is there evidence of H3 thinking in management \n    commentary and capex allocation?\n\nPORTFOLIO BALANCE DIAGNOSIS\n  Most companies over-invest in H1 and under-invest \n  in H2. State where this company sits.\n  \n  An unbalanced portfolio = future growth at risk\n  even when current results look strong.\n\nsection_finding: Whether the growth portfolio is \nbalanced, H1-heavy, or genuinely investing in the future.\n\n═══════════════════════════════════════\nFRAMEWORK 7 — STRATEGIC OPTIONS\n═══════════════════════════════════════\n\nWhat are the 3 real choices in front of this company?\n\nMC's job is to define the options clearly so \nmanagement can choose — not to choose for them.\n\nFor each option:\n  OPTION NAME: A clear label (e.g., \"Double Down on Core\", \n    \"Adjacent Market Expansion\", \"Portfolio Restructuring\")\n  \n  WHAT IT REQUIRES: Capabilities, capital, and time\n  \n  WHAT IT SACRIFICES: What you cannot do if you \n    pursue this option (trade-offs are real)\n  \n  THE CONDITION UNDER WHICH THIS WINS: What must \n    be true about the market or the company for \n    this option to be the right choice\n  \n  RISK IF WRONG: What happens if the underlying \n    condition does not materialize\n\nOptions must be genuine alternatives — not variations \nof the same choice. If two options require the same \nthing, they are not distinct options.\n\nsection_finding: The option with the strongest \nevidence base from the analysis above.\n\n═══════════════════════════════════════\nFRAMEWORK 8 — ORGANIZATIONAL READINESS\n(McKinsey 7S — Abbreviated)\n═══════════════════════════════════════\n\nCan the organization actually execute?\n\nStrategy without execution capability is decoration.\n\nAssess alignment across the three most critical S's \nfor this specific company:\n\n  STRATEGY — is it clear, differentiated, and understood?\n  STRUCTURE — does the org structure enable or block it?\n  SYSTEMS — do the management systems (incentives, \n    reporting, planning) reinforce the strategy?\n\nThen identify the single biggest misalignment.\nA strategy-structure misalignment is the most common \nreason good strategies fail.\n\nsection_finding: The organizational constraint \nmost likely to prevent strategy execution.\n\n═══════════════════════════════════════\nBOARD RECOMMENDATION — SCR FORMAT\n═══════════════════════════════════════\n\nWritten in McKinsey's Situation-Complication-Resolution \nformat. This is the structure of every board slide.\n\nSITUATION: What is objectively true about the \n  company and its market right now. Undisputed facts.\n\nCOMPLICATION: What has changed or is changing that \n  makes the situation problematic. The tension.\n\nRESOLUTION: What the company must address — \n  not what it should do, but what question it \n  must answer to set direction.\n\nPRIORITY ACTIONS:\n  Three actions ranked by strategic leverage.\n  Each action:\n    - Addresses a specific finding above\n    - Has a clear owner (function, not person)\n    - Has a 90-day and 12-month milestone\n\nTHE BOARD QUESTION:\n  The single question management must answer \n  at the next board meeting.\n  Specific. Testable. Time-bound.\n\n═══════════════════════════════════════\nOUTPUT — STRICT JSON\n═══════════════════════════════════════\n\nNo markdown. Analysis only. Numbers as evidence.\nStart with { and end with }\n\n{\n  \"company\": \"\",\n  \"ticker\": \"\",\n  \"sector\": \"\",\n  \"period\": \"\",\n  \"generated_on\": \"\",\n\n  \"data_quality\": {\n    \"status\": \"CLEAN | PARTIAL | COMPROMISED\",\n    \"impact_on_analysis\": \"\"\n  },\n\n  \"problem_definition\": {\n    \"central_problem\": \"\",\n    \"issue_tree\": [\n      {\n        \"branch\": \"\",\n        \"diagnostic_questions\": []\n      }\n    ],\n    \"section_finding\": \"\"\n  },\n\n  \"industry_structure\": {\n    \"competitive_rivalry\": {\n      \"rating\": \"FAVORABLE | NEUTRAL | UNFAVORABLE\",\n      \"analysis\": \"\"\n    },\n    \"buyer_power\": {\n      \"rating\": \"FAVORABLE | NEUTRAL | UNFAVORABLE\",\n      \"analysis\": \"\"\n    },\n    \"supplier_power\": {\n      \"rating\": \"FAVORABLE | NEUTRAL | UNFAVORABLE\",\n      \"analysis\": \"\"\n    },\n    \"threat_of_entrants\": {\n      \"rating\": \"FAVORABLE | NEUTRAL | UNFAVORABLE\",\n      \"analysis\": \"\"\n    },\n    \"threat_of_substitutes\": {\n      \"rating\": \"FAVORABLE | NEUTRAL | UNFAVORABLE\",\n      \"analysis\": \"\"\n    },\n    \"overall_attractiveness\": \"ATTRACTIVE | MIXED | UNATTRACTIVE\",\n    \"section_finding\": \"\"\n  },\n\n  \"competitive_position\": {\n    \"generic_strategy\": \"COST LEADERSHIP | DIFFERENTIATION | FOCUS | STUCK IN MIDDLE\",\n    \"strategy_execution\": \"\",\n    \"advantage_durability\": \"\",\n    \"market_share_trajectory\": \"\",\n    \"primary_competitive_threat\": \"\",\n    \"section_finding\": \"\"\n  },\n\n  \"value_chain\": {\n    \"primary_activities\": [\n      {\n        \"activity\": \"\",\n        \"position\": \"ADVANTAGE | COMMODITY | WEAKNESS\",\n        \"analysis\": \"\"\n      }\n    ],\n    \"margin_leak\": \"\",\n    \"highest_leverage_activity\": \"\",\n    \"section_finding\": \"\"\n  },\n\n  \"full_potential_gap\": {\n    \"gap_type\": \"STRUCTURAL | EXECUTIONAL | MIXED\",\n    \"performance_drags\": [\n      {\n        \"type\": \"PRICING | COST | GROWTH | PORTFOLIO\",\n        \"magnitude\": \"HIGH | MEDIUM | LOW\",\n        \"analysis\": \"\"\n      }\n    ],\n    \"section_finding\": \"\"\n  },\n\n  \"growth_architecture\": {\n    \"horizon_1\": {\n      \"status\": \"GROWING | STABLE | DECLINING\",\n      \"core_threat\": \"\",\n      \"investment_adequacy\": \"ADEQUATE | UNDERINVESTED | OVERINVESTED\"\n    },\n    \"horizon_2\": {\n      \"initiatives\": [],\n      \"funding_status\": \"ADEQUATE | STARVED | OVERFUNDED\",\n      \"path_to_h1\": \"\"\n    },\n    \"horizon_3\": {\n      \"options_visible\": \"YES | NO | PARTIAL\",\n      \"analysis\": \"\"\n    },\n    \"portfolio_balance\": \"BALANCED | H1-HEAVY | H2-HEAVY\",\n    \"section_finding\": \"\"\n  },\n\n  \"strategic_options\": [\n    {\n      \"option\": \"\",\n      \"requires\": \"\",\n      \"sacrifices\": \"\",\n      \"wins_when\": \"\",\n      \"risk_if_wrong\": \"\"\n    }\n  ],\n  \"options_finding\": \"\",\n\n  \"organizational_readiness\": {\n    \"strategy_clarity\": \"HIGH | MEDIUM | LOW\",\n    \"structure_alignment\": \"ALIGNED | PARTIAL | MISALIGNED\",\n    \"systems_alignment\": \"ALIGNED | PARTIAL | MISALIGNED\",\n    \"critical_misalignment\": \"\",\n    \"section_finding\": \"\"\n  },\n\n  \"board_recommendation\": {\n    \"situation\": \"\",\n    \"complication\": \"\",\n    \"resolution\": \"\",\n    \"priority_actions\": [\n      {\n        \"action\": \"\",\n        \"addresses\": \"\",\n        \"owner\": \"\",\n        \"milestone_90_days\": \"\",\n        \"milestone_12_months\": \"\"\n      }\n    ],\n    \"the_board_question\": \"\"\n  }\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1824,
+        32
+      ],
+      "id": "dac63626-7e4f-4a79-96a4-1eef12834e2b",
+      "name": "Consulting analyst"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "DATA",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        -368
+      ],
+      "id": "9669ce0b-cae7-499d-bb72-046be865f9be",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3-flash-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1808,
+        -288
+      ],
+      "id": "cc66be02-2917-49d4-9773-d52e967d1490",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Xd0YMtfjSNAKp0NY",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3-flash-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        224
+      ],
+      "id": "dddec13f-c33e-4d2b-bad5-ba364ce39e21",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Xd0YMtfjSNAKp0NY",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=YOY GET A STOCK TICKER\nI WANT YOU TO COMPLETE THE TASK DEFINED BY SYSTEM MESSAGE :\n\n{{ $json.body.ticker }}.NS",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a search query generator for financial market intelligence.\n\nINPUT: A company name or ticker (Indian listed company).\n\nOUTPUT: Exactly 4-5 search queries. JSON only. Nothing else.\n\nYOUR JOB:\nIdentify the company, its sector, and its 2-3 closest listed peers.\nGenerate queries covering:\n  - Company's recent news/catalysts\n  - Sector/industry trends affecting the company\n  - Competitor activity (name the specific competitor)\n  - Macro or regulatory environment relevant to the sector\n\nQUERY RULES:\n  - Plain factual phrases, no questions\n  - No adjectives, no speculation\n  - Each query targets different information\n  - 4-7 words per query maximum"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -64,
+        -528
+      ],
+      "id": "dc49c015-128b-4504-bdcb-248a7daa687f",
+      "name": "QUERY INTELLIGENCE AGENT"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"company_name\": \"STRING\",\n  \"symbol\": \"STRING\",\n  \"queries\": [\n    {\n      \"query\": \"STRING\",\n      \"category\": \"STRING\"\n    }\n  ]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        -320
+      ],
+      "id": "c9a20569-8c07-4375-abd5-26296d683de3",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "query": "={{ $json.query }}",
+        "options": {
+          "topic": "general",
+          "search_depth": "advanced",
+          "max_results": 5,
+          "include_domains": [
+            "reuters.com",
+            "business-standard.com",
+            "livemint.com",
+            "economictimes.indiatimes.com",
+            "nseindia.com",
+            "bseindia.com",
+            "sebi.gov.in"
+          ]
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -528
+      ],
+      "id": "95458dcb-6292-493b-996d-5fcc2a3997f7",
+      "name": "Search",
+      "credentials": {
+        "tavilyApi": {
+          "id": "nl3B3LRGToSjmmNu",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -320
+      ],
+      "id": "2b617e49-5023-442e-b3cf-27401a5255df",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Xd0YMtfjSNAKp0NY",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -528
+      ],
+      "id": "5d889bb4-f75b-43c3-a7bd-88990ddc337d",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.queries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        272,
+        -528
+      ],
+      "id": "b5074f9e-93cf-4994-8dd9-71412a62eedb",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "content": "# MARKET INTELLIGENCE SYSTEM\n",
+        "height": 480,
+        "width": 976
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -176,
+        -640
+      ],
+      "typeVersion": 1,
+      "id": "8b8dbd8e-402c-4dcf-9a06-39c2393c0990",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# AUDIT SYSTEM",
+        "height": 400,
+        "width": 592,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        912,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "26b04f0f-3068-47d2-bf25-e4541b6d2038",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Audit the following financial data and return JSON only:\n\n{{ JSON.stringify($json['FINANCIAL DATA']) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a financial data quality checker.\nAnalyze the financial statements and return only this JSON:\n\n{\n  \"company\": \"\",\n  \"years_audited\": [],\n  \"missing_fields\": [{\"year\": \"\", \"field\": \"\", \"statement\": \"\", \"impact\": \"\"}],\n  \"cross_statement\": {\n    \"net_income_match\": \"PASS or FAIL\",\n    \"balance_sheet_equation\": \"PASS or FAIL\"\n  },\n  \"anomalies\": [{\"type\": \"\", \"severity\": \"HIGH or MEDIUM or LOW\", \"year\": \"\", \"note\": \"\"}]\n}\n\nNo markdown. No explanation. JSON only."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        976,
+        176
+      ],
+      "id": "0dd3aec2-6b18-4d1b-954f-c3dd18e83c50",
+      "name": "AUDIT AGENT"
+    },
+    {
+      "parameters": {
+        "content": "## MANAGEMENT COMMITTEE",
+        "height": 432,
+        "width": 512,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1744,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "2e656b31-819c-4867-bf8a-bd69a66328b1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## INVESTMENT BANKING COMMITTEE",
+        "height": 448,
+        "width": 512,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1744,
+        -576
+      ],
+      "typeVersion": 1,
+      "id": "5cb59ffe-4af3-4ba2-bb69-c1e4efb89c9d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2704,
+        -160
+      ],
+      "id": "596b5357-2c34-4392-8aab-bc5f3fbc0d7c",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2352,
+        -160
+      ],
+      "id": "111e6d7c-ebaa-408c-8836-afce2c387c54",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2528,
+        -160
+      ],
+      "id": "c5280938-03a7-40e2-83fa-be6e43e4b6dd",
+      "name": "Aggregate2"
+    },
+    {
+      "parameters": {
+        "content": "# FINANCIAL DATA SYSTEM",
+        "height": 688,
+        "width": 832,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -176,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "47c5cb68-a2b6-4375-8b0b-d9d6245988c6",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/cash-flow-statement-ttm?symbol={{ $json.body.ticker }}.NS&limit=1&apikey=dbNyRfQKgqKOXmFXI0FJaTaFIWrzkfnN",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -32,
+        336
+      ],
+      "id": "0c4e85a6-2c31-4b61-b3d7-48b2f0a8b780",
+      "name": "CASH FLOW"
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/balance-sheet-statement-ttm?symbol={{ $json.body.ticker }}.NS&period=annual&limit=1&apikey=dbNyRfQKgqKOXmFXI0FJaTaFIWrzkfnN",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -32,
+        32
+      ],
+      "id": "39ab3286-66bf-4121-8d05-354ad80f53cd",
+      "name": "BALANCE SHEET"
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/income-statement-ttm?symbol={{ $json.body.ticker }}.NS&annual&limit=1&apikey=dbNyRfQKgqKOXmFXI0FJaTaFIWrzkfnN",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -32,
+        192
+      ],
+      "id": "71d15527-d175-4cc2-9eb0-7d30bcb935ba",
+      "name": "INCOME STATEMENT"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        288,
+        160
+      ],
+      "id": "c6cb0b75-43bb-4c49-a541-ce3dc0e9d323",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "FINANCIAL DATA",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        512,
+        192
+      ],
+      "id": "e17fcc4a-ad8d-4917-9754-7fc71aa3476e",
+      "name": "Aggregate3"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "verdict-analysis-tool",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -672,
+        -336
+      ],
+      "id": "09641c26-b07e-4115-bcf8-c1ce3c22cb1e",
+      "name": "Webhook",
+      "webhookId": "8900fe28-1996-49be-a239-a43dfc83cb05"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        976,
+        352
+      ],
+      "id": "4ff599e3-094a-4f4e-8c76-859e4d3d72f8",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "xHVzabbIRfQ8PtJ4",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output;\n\nconst cleaned = raw\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\nreturn [{ json: JSON.parse(cleaned) }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        176
+      ],
+      "id": "8b745727-8c75-417f-9ee3-245b993a2b19",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output;\n\nconst cleaned = raw\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (e) {\n  return [{ json: { error: true, error_message: \"JSON parse failed\" } }];\n}\n\nconst get = (obj, ...keys) => {\n  for (const key of keys) {\n    if (obj[key] !== undefined && obj[key] !== null) return obj[key];\n  }\n  return null;\n};\n\nconst safe = {\n \n  data_quality:         get(parsed, 'data_quality'),\n  quality_of_earnings:  get(parsed, 'quality_of_earnings'),\n  capital_structure:    get(parsed, 'capital_structure'),\n  returns_analysis:     get(parsed, 'returns_analysis'),\n  variant_perception:   get(parsed, 'variant_perception'),\n  peer_benchmarking:    get(parsed, 'peer_benchmarking'),\n  stress_test:          get(parsed, 'stress_test'),\n  management_questions: get(parsed, 'management_questions'),\n  ic_briefing:          get(parsed, 'ic_briefing'),\n};\n\nconsole.log(\"Nulls:\", Object.entries(safe)\n  .filter(([k,v]) => v === null)\n  .map(([k]) => k));\n\nreturn [{ json: safe }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        -496
+      ],
+      "id": "55009f2e-f8be-4fe2-b30a-6dace81d52c8",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/ratios?symbol={{ $json.body.ticker }}.NS&apikey=dbNyRfQKgqKOXmFXI0FJaTaFIWrzkfnN",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -32,
+        480
+      ],
+      "id": "ae484b92-e664-4644-9bf0-2ab7f56c897c",
+      "name": "FINANCIAL RATIOS"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output;\n\nconst cleaned = raw\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (e) {\n  return [{ json: { error: true, error_message: \"JSON parse failed\" } }];\n}\n\n// Remap whatever the model returns to fixed frontend keys\n// Handles both clean keys and prefixed keys like framework_1_xxx\nconst get = (obj, ...keys) => {\n  for (const key of keys) {\n    if (obj[key] !== undefined && obj[key] !== null) return obj[key];\n  }\n  return null;\n};\n\nconst safe = {\n  company:                  get(parsed, 'company'),\n  ticker:                   get(parsed, 'ticker'),\n  sector:                   get(parsed, 'sector'),\n  period:                   get(parsed, 'period'),\n  generated_on:             get(parsed, 'generated_on'),\n  data_quality:             get(parsed, 'data_quality'),\n  problem_definition:       get(parsed, 'problem_definition', 'framework_1_problem_definition'),\n  industry_structure:       get(parsed, 'industry_structure', 'framework_2_industry_structure'),\n  competitive_position:     get(parsed, 'competitive_position', 'framework_3_competitive_position'),\n  value_chain:              get(parsed, 'value_chain', 'framework_4_value_chain'),\n  full_potential_gap:       get(parsed, 'full_potential_gap', 'framework_5_full_potential_gap'),\n  growth_architecture:      get(parsed, 'growth_architecture', 'framework_6_growth_architecture'),\n  strategic_options:        get(parsed, 'strategic_options', 'framework_7_strategic_options'),\n  organizational_readiness: get(parsed, 'organizational_readiness', 'framework_8_organizational_readiness'),\n  board_recommendation:     get(parsed, 'board_recommendation', 'board_recommendation_scr'),\n};\n\n// Log what came in vs what mapped — helps debug future mismatches\nconsole.log(\"Model keys:\", Object.keys(parsed));\nconsole.log(\"Mapped nulls:\", Object.entries(safe).filter(([k,v]) => v === null).map(([k]) => k));\n\nreturn [{ json: safe }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        32
+      ],
+      "id": "0db2f51d-de0d-4fbd-a2f2-6d4c82103bcf",
+      "name": "Code in JavaScript2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Investment Banker Analyst",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consulting analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Investment Banker Analyst",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Consulting analyst",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Investment Banker Analyst": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "QUERY INTELLIGENCE AGENT": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "QUERY INTELLIGENCE AGENT",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "QUERY INTELLIGENCE AGENT",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AUDIT AGENT": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consulting analyst": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        []
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BALANCE SHEET": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INCOME STATEMENT": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "CASH FLOW": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate3": {
+      "main": [
+        [
+          {
+            "node": "AUDIT AGENT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "QUERY INTELLIGENCE AGENT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CASH FLOW",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "INCOME STATEMENT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "BALANCE SHEET",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FINANCIAL RATIOS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AUDIT AGENT",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FINANCIAL RATIOS": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "2eb3381a-abf2-4f86-a5c5-ce84a201ecf0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9a91007b9b333062e195e7deca95454919fccd3c0adcf1f4ab1bdba0b5755114"
+  },
+  "id": "r2RYREo-ERtX1Y44RnAnA",
+  "tags": []
+}
